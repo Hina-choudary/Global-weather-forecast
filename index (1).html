@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Climate Pulse AI — Real-Time Weather Forecast & AQI</title>
+    <meta name="description" content="Get real-time global weather forecasts, hourly telemetry, 5-day forecasts, air quality index (AQI), and bilingual AI voice advisory in English and Urdu.">
+    <meta name="author" content="Hina Muqaddas">
+  
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        urdu: ['Noto Nastaliq Urdu', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Soft Mountain Dynamic Background */
+        .mountain-backdrop {
+            background: linear-gradient(180deg, rgba(224, 242, 254, 0.65) 0%, rgba(241, 245, 249, 0.85) 100%),
+                        url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat fixed;
+        }
+
+        .dark .mountain-backdrop {
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.88) 0%, rgba(30, 41, 59, 0.95) 100%),
+                        url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat fixed;
+        }
+
+        /* Soft Glassmorphism Cards */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+        }
+
+        .dark .glass-card {
+            background: rgba(30, 41, 59, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Category Pill Scrollbar */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="mountain-backdrop min-h-screen text-slate-800 dark:text-slate-100 font-sans transition-colors duration-500 relative flex flex-col justify-between">
+
+    <!-- Top Announcement Bar (Latest Alerts) -->
+    <div class="bg-gradient-to-r from-red-500 via-rose-500 to-amber-500 text-white text-xs font-semibold py-2 px-4 shadow-sm">
+        <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+            <div class="flex items-center gap-2 overflow-hidden whitespace-nowrap">
+                <span class="bg-white/20 px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider animate-pulse flex items-center gap-1">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Live Telemetry
+                </span>
+                <span id="alert-banner-text" class="text-xs truncate">Monsoonal & atmospheric telemetry operational. Global weather telemetry live stream connected.</span>
+            </div>
+            <div class="hidden sm:flex items-center gap-3 font-mono text-[11px] opacity-90 shrink-0">
+                <span><i class="fa-regular fa-clock"></i> Live Feed</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Header / Navigation -->
+    <header class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 sticky top-0 z-40 shadow-sm transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-4">
+            
+            <!-- Logo with Animated Earth Icon -->
+            <div class="flex items-center gap-3">
+                <div class="relative w-11 h-11 rounded-2xl bg-gradient-to-tr from-sky-500 via-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-sky-500/20 group">
+                    <i class="fa-solid fa-earth-americas text-2xl group-hover:rotate-45 transition-transform duration-700"></i>
+                    <span class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+                </div>
+                <div>
+                    <h1 class="text-xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-1.5">
+                        GlobalClimate <span class="text-sky-600 dark:text-sky-400">Pulse AI</span>
+                    </h1>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Official International Meteorological Portal</p>
+                </div>
+            </div>
+
+            <!-- Social Links, Dark Mode & Language Switcher -->
+            <div class="flex items-center gap-3">
+                
+                <!-- Dark Mode Toggle Button -->
+                <button onclick="toggleDarkMode()" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-amber-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition flex items-center justify-center text-sm border border-slate-200 dark:border-slate-700" title="Toggle Dark/Light Mode">
+                    <i id="dark-icon" class="fa-solid fa-moon"></i>
+                </button>
+
+                <!-- Language Toggle Buttons -->
+                <div class="bg-slate-100 dark:bg-slate-800 p-1 rounded-xl flex items-center gap-1 border border-slate-200 dark:border-slate-700">
+                    <button onclick="setLanguage('en')" id="btn-en" class="px-3 py-1 rounded-lg text-xs font-bold transition bg-sky-600 text-white shadow-sm">EN</button>
+                    <button onclick="setLanguage('ur')" id="btn-ur" class="px-3 py-1 rounded-lg text-xs font-bold transition text-slate-600 dark:text-slate-300 hover:text-slate-900">اردو</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 w-full space-y-8">
+
+        <!-- Global Search Hero Box -->
+        <section class="max-w-3xl mx-auto text-center space-y-4">
+            <h2 id="hero-title" class="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                Real-Time Atmospheric Weather Telemetry
+            </h2>
+            <p id="hero-subtitle" class="text-slate-600 dark:text-slate-300 text-sm max-w-xl mx-auto">
+                Access live weather metrics, hourly telemetry, 5-day forecasts, and AI voice advisory globally.
+            </p>
+
+            <!-- Search Bar + Geolocation Button -->
+            <form id="search-form" class="relative max-w-2xl mx-auto">
+                <div class="relative flex items-center">
+                    <i class="fa-solid fa-location-dot absolute left-5 text-sky-500 text-lg"></i>
+                    <input 
+                        type="text" 
+                        id="city-input" 
+                        placeholder="Search any global city (e.g. Islamabad, London, Tokyo, New York)..." 
+                        class="w-full bg-white/95 dark:bg-slate-800/95 text-slate-800 dark:text-white text-base rounded-2xl pl-14 pr-44 py-4 outline-none font-medium border border-slate-200 dark:border-slate-700 shadow-lg shadow-sky-900/5 focus:border-sky-500 focus:ring-4 focus:ring-sky-500/10 transition"
+                    />
+                    
+                    <!-- GPS Geolocation Button -->
+                    <button 
+                        type="button" 
+                        onclick="getCurrentLocationWeather()" 
+                        title="Use My GPS Location" 
+                        class="absolute right-28 bg-slate-100 dark:bg-slate-700 hover:bg-sky-100 text-sky-600 dark:text-sky-300 p-2.5 rounded-xl text-sm transition flex items-center justify-center border border-slate-200 dark:border-slate-600"
+                    >
+                        <i class="fa-solid fa-crosshairs text-base"></i>
+                    </button>
+
+                    <button 
+                        type="submit" 
+                        class="absolute right-2.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm shadow-md transition active:scale-95 flex items-center gap-2"
+                    >
+                        <span id="txt-search">Search</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Recent Searches Chips -->
+            <div id="recent-searches-container" class="hidden flex items-center justify-center gap-2 flex-wrap text-xs font-mono">
+                <span class="text-slate-400">Recent:</span>
+                <div id="recent-chips" class="flex items-center gap-1.5 flex-wrap"></div>
+            </div>
+
+            <!-- Error Banner -->
+            <div id="error-message" class="hidden max-w-2xl mx-auto p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-center justify-center gap-2 animate-bounce">
+                <i class="fa-solid fa-circle-exclamation text-rose-500"></i>
+                <span id="error-text">City not found. Please verify spelling and try again.</span>
+            </div>
+        </section>
+
+        <!-- Category Badges Bar -->
+        <section class="overflow-x-auto no-scrollbar py-2">
+            <div class="flex items-center gap-2 min-w-max justify-start md:justify-center">
+                <button onclick="scrollToSection('weather-dashboard')" class="cat-pill px-4 py-2 rounded-xl bg-white/90 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 hover:border-sky-400 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm flex items-center gap-2">
+                    <i class="fa-solid fa-sun text-amber-500"></i> <span id="cat-daily">Daily Weather</span>
+                </button>
+                <button onclick="scrollToSection('hourly-section')" class="cat-pill px-4 py-2 rounded-xl bg-white/90 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 hover:border-sky-400 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm flex items-center gap-2">
+                    <i class="fa-solid fa-clock text-sky-500"></i> <span id="cat-hourly">24h Hourly Stream</span>
+                </button>
+                <button onclick="scrollToSection('forecast-section')" class="cat-pill px-4 py-2 rounded-xl bg-white/90 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 hover:border-sky-400 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-day text-indigo-500"></i> <span id="cat-3day">5-Day Forecast</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Loading State -->
+        <div id="loading-spinner" class="hidden py-16 text-center">
+            <div class="w-14 h-14 border-4 border-sky-200 border-t-sky-600 rounded-full animate-spin mx-auto mb-4"></div>
+            <p class="text-slate-600 dark:text-slate-300 font-mono text-sm font-semibold">Connecting to Global OpenWeather Telemetry Nodes...</p>
+        </div>
+
+        <!-- Weather Display Dashboard -->
+        <div id="weather-dashboard" class="space-y-8">
+
+            <!-- Primary Current Weather Glass Card -->
+            <div class="glass-card rounded-3xl p-6 sm:p-8 relative overflow-hidden transition-all duration-700">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+                    
+                    <!-- Main Temperature & Info -->
+                    <div class="lg:col-span-7 space-y-4">
+                        <div class="flex items-center gap-3">
+                            <span id="country-badge" class="px-3 py-1 rounded-full bg-sky-100 dark:bg-sky-900/50 text-sky-800 dark:text-sky-300 border border-sky-300 dark:border-sky-700 font-mono text-xs font-extrabold uppercase">PK</span>
+                            <span id="current-time" class="text-xs text-slate-500 dark:text-slate-400 font-mono font-medium">Friday, Oct 23, 2026</span>
+                        </div>
+
+                        <div>
+                            <h3 id="display-city" class="text-4xl sm:text-5xl font-black text-slate-900 dark:text-white tracking-tight">Islamabad</h3>
+                            <p id="display-condition" class="text-lg text-sky-700 dark:text-sky-400 font-semibold capitalize mt-1">Clear Sky</p>
+                        </div>
+
+                        <div class="flex items-baseline gap-4 pt-2">
+                            <span id="display-temp" class="text-6xl sm:text-7xl font-black text-slate-900 dark:text-white tracking-tighter">29°</span>
+                            <div class="text-slate-500 dark:text-slate-400 text-xs sm:text-sm font-mono space-y-0.5">
+                                <div>Feels Like: <span id="display-feels" class="text-slate-900 dark:text-slate-200 font-bold">29°C</span></div>
+                                <div>High / Low: <span id="display-range" class="text-slate-900 dark:text-slate-200 font-bold">29° / 29°</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Weather Icon & Main State -->
+                    <div class="lg:col-span-5 flex flex-col items-center justify-center border-t lg:border-t-0 lg:border-l border-slate-200/80 dark:border-slate-700/80 pt-6 lg:pt-0 lg:pl-8">
+                        <img id="display-icon" src="https://openweathermap.org/img/wn/01d@4x.png" alt="Weather Icon" class="w-36 h-36 object-contain filter drop-shadow-md">
+                        <span id="display-main" class="text-slate-700 dark:text-slate-300 font-extrabold text-lg tracking-wider uppercase font-mono mt-1">Clear</span>
+                    </div>
+                </div>
+
+                <!-- AI Smart Advisor & Bilingual Audio Section -->
+                <div class="mt-8 pt-6 border-t border-slate-200/80 dark:border-slate-700/80 grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                    <div class="md:col-span-8 bg-sky-50/80 dark:bg-slate-800/80 border border-sky-200 dark:border-slate-700 p-4 rounded-2xl flex items-start gap-3">
+                        <i class="fa-solid fa-wand-magic-sparkles text-sky-600 dark:text-sky-400 text-xl mt-0.5 shrink-0"></i>
+                        <div>
+                            <h4 id="txt-ai-title" class="text-xs font-mono font-bold text-sky-800 dark:text-sky-300 uppercase tracking-wider">AI Smart Clothing & Health Advisor</h4>
+                            <p id="ai-advice-body" class="text-sm text-slate-700 dark:text-slate-200 font-medium mt-1">Optimal atmospheric conditions! Perfect day for outdoor activities, walking, or light jogging.</p>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-4 flex justify-end">
+                        <button onclick="speakWeatherAdvice()" class="w-full md:w-auto px-5 py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs rounded-2xl shadow-md transition flex items-center justify-center gap-2 active:scale-95">
+                            <i class="fa-solid fa-volume-high text-sm"></i>
+                            <span id="txt-listen-btn">Listen AI Voice Briefing</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weather Metrics Grid (AQI, Humidity, Wind, Pressure) -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="glass-card p-5 rounded-2xl border-l-4 border-emerald-500">
+                    <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+                        <span class="text-xs font-mono font-bold">AIR QUALITY (AQI)</span>
+                        <i class="fa-solid fa-wind text-emerald-500"></i>
+                    </div>
+                    <div id="metric-aqi" class="text-2xl font-black text-slate-900 dark:text-white">Good (1)</div>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-mono">Atmospheric Purity</p>
+                </div>
+
+                <div class="glass-card p-5 rounded-2xl border-l-4 border-sky-500">
+                    <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+                        <span class="text-xs font-mono font-bold">HUMIDITY</span>
+                        <i class="fa-solid fa-droplet text-sky-500"></i>
+                    </div>
+                    <div id="metric-humidity" class="text-2xl font-black text-slate-900 dark:text-white">45%</div>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-mono">Moisture Index</p>
+                </div>
+
+                <div class="glass-card p-5 rounded-2xl border-l-4 border-blue-500">
+                    <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+                        <span class="text-xs font-mono font-bold">WIND VELOCITY</span>
+                        <i class="fa-solid fa-compass text-blue-500"></i>
+                    </div>
+                    <div id="metric-wind" class="text-2xl font-black text-slate-900 dark:text-white">12.5 km/h</div>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-mono">Gale Speed</p>
+                </div>
+
+                <div class="glass-card p-5 rounded-2xl border-l-4 border-purple-500">
+                    <div class="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-2">
+                        <span class="text-xs font-mono font-bold">BAROMETER</span>
+                        <i class="fa-solid fa-gauge-high text-purple-500"></i>
+                    </div>
+                    <div id="metric-pressure" class="text-2xl font-black text-slate-900 dark:text-white">1012 hPa</div>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-mono">Atmospheric Pressure</p>
+                </div>
+            </div>
+
+            <!-- 24-HOUR HOURLY TELEMETRY STREAM -->
+            <div id="hourly-section" class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                        <i class="fa-solid fa-clock text-sky-500"></i>
+                        <span>24-Hour Telemetry Stream</span>
+                    </h3>
+                    <span class="text-xs text-slate-400 font-mono">Scroll &rarr;</span>
+                </div>
+
+                <!-- Horizontal Scrollable Container -->
+                <div id="hourly-stream" class="flex gap-4 overflow-x-auto no-scrollbar py-2">
+                    <!-- Hourly forecast cards rendered dynamically -->
+                </div>
+            </div>
+
+            <!-- 5-DAY CITIES FORECAST STREAM SECTION -->
+            <div id="forecast-section" class="space-y-4 pt-2">
+                <div class="flex items-center justify-between">
+                    <h3 id="txt-stream-title" class="text-lg font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                        <i class="fa-solid fa-calendar-days text-sky-600"></i>
+                        <span>5-Day Forecast Stream</span>
+                    </h3>
+                </div>
+
+                <!-- 5-Day Cards Container -->
+                <div id="forecast-stream" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <!-- Daily forecast cards rendered dynamically -->
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Complete Meteorological Footer -->
+    <footer class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-t border-slate-200/80 dark:border-slate-800 mt-16 pt-10 pb-6 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 space-y-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-sm">
+                
+                <div class="space-y-3">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-xl bg-sky-600 flex items-center justify-center text-white text-sm">
+                            <i class="fa-solid fa-earth-americas"></i>
+                        </div>
+                        <span class="font-black text-base text-slate-900 dark:text-white">GlobalClimate Pulse AI</span>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                        International meteorological telemetry portal providing accurate atmospheric observations and AI weather forecasts.
+                    </p>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-slate-900 dark:text-white mb-3 text-xs uppercase tracking-wider font-mono">Quick Navigation</h4>
+                    <ul class="space-y-2 text-xs text-slate-600 dark:text-slate-400 font-medium">
+                        <li><a href="#" class="hover:text-sky-600 transition">Global City Forecast</a></li>
+                        <li><a href="#" class="hover:text-sky-600 transition">Air Quality Monitoring (AQI)</a></li>
+                        <li><a href="#" class="hover:text-sky-600 transition">Hourly Telemetry Stream</a></li>
+                        <li><a href="#" class="hover:text-sky-600 transition">Seasonal Bulletins</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-slate-900 dark:text-white mb-3 text-xs uppercase tracking-wider font-mono">AI Capabilities</h4>
+                    <ul class="space-y-2 text-xs text-slate-600 dark:text-slate-400 font-medium">
+                        <li><a href="#" class="hover:text-sky-600 transition">Bilingual Voice Synthesis</a></li>
+                        <li><a href="#" class="hover:text-sky-600 transition">Clothing & Health Recommendations</a></li>
+                        <li><a href="#" class="hover:text-sky-600 transition">Monsoonal Risk Advisory</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-slate-900 dark:text-white mb-3 text-xs uppercase tracking-wider font-mono">Data Sources</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-3">
+                        Powered by OpenWeatherMap API Services & Web Speech Synthesis.
+                    </p>
+                    <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="text-[11px] font-mono text-emerald-700 dark:text-emerald-400 font-semibold">Telemetry Nodes Online</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="pt-6 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-500 dark:text-slate-400 font-mono flex flex-col sm:flex-row items-center justify-between gap-3">
+                <p>© 2026 <span class="font-bold text-slate-800 dark:text-slate-200">GlobalClimate Pulse AI</span>. All rights reserved.</p>
+                <p>Designed for Advanced Web Telemetry Demonstrations</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        const API_KEY = "ab3857c87a0a03c6d749169c5a2c7e3b"; // Verified API Key
+        let currentLang = 'en';
+        let currentWeatherData = null;
+        let recentSearches = JSON.parse(localStorage.getItem('weather_recent_cities') || '["Islamabad"]');
+
+        const langStrings = {
+            en: {
+                heroTitle: "Real-Time Atmospheric Weather Telemetry",
+                heroSub: "Access live weather metrics, hourly telemetry, 5-day forecasts, and AI voice advisory globally.",
+                searchBtn: "Search",
+                catDaily: "Daily Weather",
+                catHourly: "24h Hourly Stream",
+                cat3day: "5-Day Forecast",
+                aiTitle: "AI Smart Clothing & Health Advisor",
+                listenBtn: "Listen AI Voice Briefing",
+                streamTitle: "5-Day Forecast Stream",
+                errText: "City not found. Please verify spelling and try again."
+            },
+            ur: {
+                heroTitle: "عالمی موسم اور فضائی حالت کی تازہ ترین رپورٹ",
+                heroSub: "دنیا کے کسی بھی شہر کے لیے لائیو موسم، 24 گھنٹے کا ڈیٹا، 5 دن کی پیش گوئی، اور AI صوتی ہدایت حاصل کریں۔",
+                searchBtn: "تلاش کریں",
+                catDaily: "روزانہ کا موسم",
+                catHourly: "24 گھنٹے کی رپورٹ",
+                cat3day: "5 دن کی پیشگوئی",
+                aiTitle: "AI سمارٹ لباس اور صحت کی ہدایت",
+                listenBtn: "AI آڈیو آواز سنیں",
+                streamTitle: "آنے والے 5 دنوں کی رپورٹ",
+                errText: "شہر نہیں مل سکا۔ براہ کرم سپیلنگ درست کر کے دوبارہ کوشش کریں۔"
+            }
+        };
+
+        // Dark Mode Toggle
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const icon = document.getElementById('dark-icon');
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                icon.className = 'fa-solid fa-moon';
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                icon.className = 'fa-solid fa-sun text-amber-400';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Apply saved theme
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+            document.getElementById('dark-icon').className = 'fa-solid fa-sun text-amber-400';
+        }
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.getElementById('btn-en').className = lang === 'en' ? 'px-3 py-1 rounded-lg text-xs font-bold transition bg-sky-600 text-white shadow-sm' : 'px-3 py-1 rounded-lg text-xs font-bold transition text-slate-600 dark:text-slate-300 hover:text-slate-900';
+            document.getElementById('btn-ur').className = lang === 'ur' ? 'px-3 py-1 rounded-lg text-xs font-bold transition bg-sky-600 text-white shadow-sm font-urdu' : 'px-3 py-1 rounded-lg text-xs font-bold transition text-slate-600 dark:text-slate-300 hover:text-slate-900 font-urdu';
+
+            const s = langStrings[lang];
+            document.getElementById('hero-title').textContent = s.heroTitle;
+            document.getElementById('hero-subtitle').textContent = s.heroSub;
+            document.getElementById('txt-search').textContent = s.searchBtn;
+            document.getElementById('cat-daily').textContent = s.catDaily;
+            document.getElementById('cat-hourly').textContent = s.catHourly;
+            document.getElementById('cat-3day').textContent = s.cat3day;
+            document.getElementById('txt-ai-title').textContent = s.aiTitle;
+            document.getElementById('txt-listen-btn').textContent = s.listenBtn;
+            document.getElementById('txt-stream-title').textContent = s.streamTitle;
+
+            if (currentWeatherData) updateAIAdvice(currentWeatherData);
+        }
+
+        document.getElementById('search-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const city = document.getElementById('city-input').value.trim();
+            if (city) fetchGlobalWeather(city);
+        });
+
+        // GPS Geolocation fetch
+        function getCurrentLocationWeather() {
+            if (navigator.geolocation) {
+                showLoading();
+                navigator.geolocation.getCurrentPosition(async (position) => {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    try {
+                        const weatherRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`);
+                        const weatherData = await weatherRes.json();
+                        fetchGlobalWeather(weatherData.name);
+                    } catch (err) {
+                        showError("Unable to fetch location weather.");
+                        hideLoading();
+                    }
+                }, () => {
+                    showError("Location access denied. Please search manually.");
+                    hideLoading();
+                });
+            } else {
+                showError("Geolocation is not supported by your browser.");
+            }
+        }
+
+        async function fetchGlobalWeather(city) {
+            hideError();
+            showLoading();
+
+            try {
+                const weatherRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&appid=${API_KEY}`);
+                if (!weatherRes.ok) throw new Error("City not found");
+                const weatherData = await weatherRes.json();
+
+                const aqiRes = await fetch(`https://api.openweathermap.org/data/2.5/air_pollution?lat=${weatherData.coord.lat}&lon=${weatherData.coord.lon}&appid=${API_KEY}`);
+                const aqiData = await aqiRes.json();
+
+                const forecastRes = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&units=metric&appid=${API_KEY}`);
+                const forecastData = await forecastRes.json();
+
+                currentWeatherData = {
+                    current: weatherData,
+                    aqi: aqiData.list[0].main.aqi,
+                    forecast: forecastData
+                };
+
+                saveRecentSearch(weatherData.name);
+                updateCityBackground(weatherData.name);
+                renderDashboard(currentWeatherData);
+            } catch (err) {
+                showError(langStrings[currentLang].errText);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function renderDashboard(data) {
+            const current = data.current;
+            document.getElementById('display-city').textContent = current.name;
+            document.getElementById('country-badge').textContent = current.sys.country;
+            document.getElementById('current-time').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' });
+            document.getElementById('display-condition').textContent = current.weather[0].description;
+            document.getElementById('display-temp').textContent = `${Math.round(current.main.temp)}°`;
+            document.getElementById('display-feels').textContent = `${Math.round(current.main.feels_like)}°C`;
+            document.getElementById('display-range').textContent = `${Math.round(current.main.temp_max)}° / ${Math.round(current.main.temp_min)}°`;
+            document.getElementById('display-main').textContent = current.weather[0].main;
+            document.getElementById('display-icon').src = `https://openweathermap.org/img/wn/${current.weather[0].icon}@4x.png`;
+
+            document.getElementById('metric-humidity').textContent = `${current.main.humidity}%`;
+            document.getElementById('metric-wind').textContent = `${(current.wind.speed * 3.6).toFixed(1)} km/h`;
+            document.getElementById('metric-pressure').textContent = `${current.main.pressure} hPa`;
+
+            const aqiNames = ["", "Good (1)", "Fair (2)", "Moderate (3)", "Poor (4)", "Very Poor (5)"];
+            document.getElementById('metric-aqi').textContent = aqiNames[data.aqi] || "Good";
+
+            updateAIAdvice(data);
+            renderHourlyStream(data.forecast);
+            renderForecastCards(data.forecast);
+        }
+
+        function updateAIAdvice(data) {
+            const temp = data.current.main.temp;
+            const desc = data.current.weather[0].main.toLowerCase();
+
+            let enAdvice = "";
+            let urAdvice = "";
+
+            if (desc.includes('rain') || desc.includes('drizzle')) {
+                enAdvice = "🌧️ Rainfall telemetry detected! Carry an umbrella and wear waterproof outerwear. Drive safely.";
+                urAdvice = "🌧️ بارش کا امكان ہے! باہر نکلتے وقت چھتری ساتھ رکھیں اور گاڑی احتیاط سے چلائیں۔";
+            } else if (temp > 30) {
+                enAdvice = "☀️ High temperature advisory! Stay well-hydrated, wear UV protection sunglasses, and apply sunblock.";
+                urAdvice = "☀️ شدید گرمی ہے! زیادہ سے زیادہ پانی پئیں، دھوپ کا چشمہ اور سن بلاک استعمال کریں۔";
+            } else if (temp < 15) {
+                enAdvice = "❄️ Cool weather! Wear a warm jacket or sweater. Safe conditions for outdoor activities.";
+                urAdvice = "❄️ موسم ٹھنڈا ہے! گرم کپڑے یا جیکٹ پہنیں۔ باہر گھومنے کے لیے بہترین وقت ہے۔";
+            } else {
+                enAdvice = "🌤️ Optimal atmospheric conditions! Perfect day for outdoor activities, walking, or light jogging.";
+                urAdvice = "🌤️ خوشگوار موسم! باہر واک کرنے اور سیر و تفریح کے لیے بہترین دن ہے۔";
+            }
+
+            document.getElementById('ai-advice-body').textContent = currentLang === 'ur' ? urAdvice : enAdvice;
+        }
+
+        function renderHourlyStream(forecastData) {
+            const list = forecastData.list.slice(0, 8); // Next 24 hours (8 intervals x 3 hrs)
+            const container = document.getElementById('hourly-stream');
+
+            container.innerHTML = list.map(item => {
+                const timeStr = new Date(item.dt * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                return `
+                    <div class="glass-card p-4 rounded-2xl text-center space-y-1.5 min-w-[100px] shrink-0 hover:border-sky-400 transition duration-300">
+                        <p class="font-bold text-slate-700 dark:text-slate-300 text-xs">${timeStr}</p>
+                        <img src="https://openweathermap.org/img/wn/${item.weather[0].icon}.png" class="w-10 h-10 mx-auto object-contain">
+                        <p class="text-sm font-extrabold text-slate-900 dark:text-white">${Math.round(item.main.temp)}°C</p>
+                        <p class="text-[10px] text-sky-600 dark:text-sky-400 font-semibold capitalize truncate">${item.weather[0].main}</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderForecastCards(forecastData) {
+            const daily = forecastData.list.filter(item => item.dt_txt.includes('12:00:00'));
+            const container = document.getElementById('forecast-stream');
+
+            container.innerHTML = daily.map(item => {
+                const dateObj = new Date(item.dt * 1000);
+                const dayName = dateObj.toLocaleDateString(currentLang === 'ur' ? 'ur-PK' : 'en-US', { weekday: 'short' });
+                const monthDate = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+                return `
+                    <div class="glass-card p-4 rounded-2xl text-center space-y-2 hover:border-sky-400 transition duration-300">
+                        <p class="font-bold text-slate-800 dark:text-slate-200 text-sm">${dayName}</p>
+                        <p class="text-[11px] font-mono text-slate-500 dark:text-slate-400">${monthDate}</p>
+                        <img src="https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png" class="w-14 h-14 mx-auto object-contain">
+                        <p class="text-xs text-sky-700 dark:text-sky-400 font-semibold capitalize truncate">${item.weather[0].description}</p>
+                        <div class="pt-2 border-t border-slate-200 dark:border-slate-700 flex justify-between items-center text-xs font-mono font-bold">
+                            <span class="text-slate-900 dark:text-slate-100">${Math.round(item.main.temp_max)}°</span>
+                            <span class="text-slate-400 font-normal">${Math.round(item.main.temp_min)}°</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function speakWeatherAdvice() {
+            const text = document.getElementById('ai-advice-body').textContent;
+            const msg = new SpeechSynthesisUtterance(text);
+            msg.lang = currentLang === 'ur' ? 'ur-PK' : 'en-US';
+            window.speechSynthesis.speak(msg);
+        }
+
+        function updateCityBackground(cityName) {
+            const card = document.querySelector('.glass-card');
+            if (card) {
+                const bgUrl = `https://picsum.photos/seed/${encodeURIComponent(cityName)}/1200/600`;
+                card.style.backgroundImage = `linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(240, 249, 255, 0.4) 100%), url('${bgUrl}')`;
+                card.style.backgroundSize = 'cover';
+                card.style.backgroundPosition = 'center';
+            }
+        }
+
+        function saveRecentSearch(cityName) {
+            if (!recentSearches.includes(cityName)) {
+                recentSearches.unshift(cityName);
+                if (recentSearches.length > 4) recentSearches.pop();
+                localStorage.setItem('weather_recent_cities', JSON.stringify(recentSearches));
+            }
+            renderRecentChips();
+        }
+
+        function renderRecentChips() {
+            const container = document.getElementById('recent-searches-container');
+            const chipsDiv = document.getElementById('recent-chips');
+            if (recentSearches.length === 0) {
+                container.classList.add('hidden');
+                return;
+            }
+            container.classList.remove('hidden');
+            chipsDiv.innerHTML = recentSearches.map(city => `
+                <button onclick="fetchGlobalWeather('${city}')" class="px-2.5 py-1 bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-lg hover:border-sky-400 text-slate-700 dark:text-slate-300 transition">
+                    ${city}
+                </button>
+            `).join('');
+        }
+
+        function scrollToSection(id) {
+            document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showLoading() {
+            document.getElementById('loading-spinner').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-spinner').classList.add('hidden');
+        }
+
+        function showError(msg) {
+            document.getElementById('error-text').textContent = msg;
+            document.getElementById('error-message').classList.remove('hidden');
+        }
+
+        function hideError() {
+            document.getElementById('error-message').classList.add('hidden');
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            renderRecentChips();
+            fetchGlobalWeather('Islamabad');
+        });
+    </script>
+</body>
+</html>
